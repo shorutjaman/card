@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Visa Card</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ================= PASSWORD SCREEN ================= */
+        #passwordScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .password-box {
+            background: white;
+            padding: 30px;
+            width: 320px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
+        }
+
+        .password-box h2 {
+            margin-bottom: 15px;
+        }
+
+        .password-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .password-box button {
+            width: 100%;
+            padding: 10px;
+            background: #1e3799;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #errorMsg {
+            color: red;
+            margin-top: 10px;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c2461, #1e3799);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            perspective: 1000px;
+        }
+
+        .card-title {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Card flip container */
+        .card-flip {
+            width: 100%;
+            height: 250px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .card-flip.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Front of card */
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        /* Front card design */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .visa-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            background: white;
+            color: #1a237e;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+
+        .chip {
+            width: 50px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .chip:before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.3);
+            top: 15px;
+        }
+
+        .chip:after {
+            content: "";
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            left: 15px;
+        }
+
+        .card-number {
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            text-align: center;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .card-holder {
+            flex: 1;
+        }
+
+        .card-holder-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .card-holder-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .expiry-date {
+            text-align: right;
+        }
+
+        .expiry-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .expiry-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* Back card design */
+        .card-back-header {
+            height: 50px;
+            background: black;
+            margin: -25px -25px 20px -25px;
+        }
+
+        .cvv-section {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .cvv-label {
+            color: #333;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cvv-value {
+            color: #333;
+            font-size: 1.2rem;
+            text-align: right;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .card-back-details {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .billing-info {
+            margin-bottom: 15px;
+        }
+
+        .billing-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .billing-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .country-zip {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .country,
+        .zip {
+            flex: 1;
+        }
+
+        .card-type {
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* Copy buttons */
+        .copy-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .copy-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Instructions */
+        .instructions {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+
+            .card-front,
+            .card-back {
+                padding: 20px;
+            }
+
+            .card-number {
+                font-size: 1.2rem;
+            }
+
+            .card-holder-name,
+            .expiry-value {
+                font-size: 1rem;
+            }
+
+            .copy-buttons {
+                gap: 8px;
+            }
+
+            .copy-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Hover effects */
+        .card-front:hover,
+        .card-back:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- PASSWORD SCREEN -->
+    <div id="passwordScreen">
+        <div class="password-box">
+            <h2>🔒 Protected Page</h2>
+            <input type="password" id="passwordInput" placeholder="Enter Password">
+            <button onclick="checkPassword()">Unlock</button>
+            <p id="errorMsg"></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card-title">My Visa Card</div>
+
+        <div class="card-flip" id="cardFlip">
+            <!-- Front of card -->
+            <div class="card-front">
+                <div class="card-header">
+                    <div class="chip"></div>
+                    <div class="visa-logo">VISA</div>
+                </div>
+
+                <div class="card-number" id="cardNumberDisplay">4549 2406 5833 0974</div>
+
+                <div class="card-details">
+                    <div class="card-holder">
+                        <div class="card-holder-label">Cardholder Name</div>
+                        <div class="card-holder-name" id="cardholderDisplay">MST SALMA KAHTUN</div>
+                    </div>
+
+                    <div class="expiry-date">
+                        <div class="expiry-label">Expiry Date</div>
+                        <div class="expiry-value" id="expiryDisplay">08/30</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back of card -->
+            <div class="card-back">
+                <div class="card-back-header"></div>
+
+                <div class="cvv-section">
+                    <div class="cvv-label">
+                        <span>CVV</span>
+                        <span>Security Code</span>
+                    </div>
+                    <div class="cvv-value" id="cvvDisplay">294</div>
+                </div>
+
+                <div class="card-back-details">
+                    <div class="billing-info">
+                        <div class="billing-label">Billing Address</div>
+                        <div class="billing-value" id="billingAddressDisplay">123 Main St, Anchorage, AK 99501</div>
+                    </div>
+
+                    <div class="country-zip">
+                        <div class="country">
+                            <div class="billing-label">Country</div>
+                            <div class="billing-value" id="countryDisplay">United States</div>
+                        </div>
+
+                        <div class="zip">
+                            <div class="billing-label">ZIP Code</div>
+                            <div class="billing-value" id="zipDisplay">99501</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-type" id="cardTypeDisplay">Visa</div>
+            </div>
+        </div>
+
+        <!-- Copy buttons -->
+        <div class="copy-buttons">
+            <button class="copy-btn" data-copy="cardNumber">
+                <i class="far fa-copy"></i> Card Number
+            </button>
+
+            <button class="copy-btn" data-copy="cardholder">
+                <i class="far fa-copy"></i> Cardholder
+            </button>
+
+            <button class="copy-btn" data-copy="expiryDate">
+                <i class="far fa-copy"></i> Expiry Date
+            </button>
+
+            <button class="copy-btn" data-copy="cvv">
+                <i class="far fa-copy"></i> CVV
+            </button>
+
+            <button class="copy-btn" data-copy="billingAddress">
+                <i class="far fa-copy"></i> Address
+            </button>
+
+            <button class="copy-btn" data-copy="country">
+                <i class="far fa-copy"></i> Country
+            </button>
+
+            <button class="copy-btn" data-copy="zipCode">
+                <i class="far fa-copy"></i> ZIP Code
+            </button>
+
+            <button class="copy-btn" data-copy="cardType">
+                <i class="far fa-copy"></i> Card Type
+            </button>
+        </div>
+
+        <div class="instructions">
+            Click on the card to flip it. Click on any button to copy that information.
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Copied to clipboard!</span>
+    </div>
+
+    <script>
+        
+        const PAGE_PASSWORD = "Sojib";
+
+        function checkPassword() {
+            const input = document.getElementById("passwordInput").value;
+            if (input === PAGE_PASSWORD) {
+                document.getElementById("passwordScreen").style.display = "none";
+            } else {
+                document.getElementById("errorMsg").textContent = "❌ Wrong password";
+            }
+        }
+        document.getElementById("passwordInput").addEventListener("keyup", e => {
+            if (e.key === "Enter") checkPassword();
+        });
+        
+        // Card data (All in English)
+        const cardData = {
+            cardNumber: "4549 2406 5833 0974",
+            cardholder: "MST SALMA KAHTUN",
+            expiryDate: "08/30",
+            cvv: "294",
+            billingAddress: "123 Main St, Anchorage, AK 99501",
+            country: "United States",
+            zipCode: "99501",
+            cardType: "Visa"
+        };
+
+        // Initialize card display
+        document.addEventListener('DOMContentLoaded', function () {
+            // Front of card
+            document.getElementById('cardNumberDisplay').textContent = formatCardNumber(cardData.cardNumber);
+            document.getElementById('cardholderDisplay').textContent = cardData.cardholder;
+            document.getElementById('expiryDisplay').textContent = cardData.expiryDate.substring(0, 5);
+
+            // Back of card
+            document.getElementById('cvvDisplay').textContent = cardData.cvv;
+            document.getElementById('billingAddressDisplay').textContent = cardData.billingAddress;
+            document.getElementById('countryDisplay').textContent = cardData.country;
+            document.getElementById('zipDisplay').textContent = cardData.zipCode;
+            document.getElementById('cardTypeDisplay').textContent = cardData.cardType;
+        });
+
+        // Card flip functionality - click anywhere on card to flip
+        document.getElementById('cardFlip').addEventListener('click', function () {
+            this.classList.toggle('flipped');
+        });
+
+        // Copy functionality
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent card flip when clicking copy button
+
+                const dataType = this.getAttribute('data-copy');
+                let textToCopy = cardData[dataType];
+
+                // For card number, remove spaces for copying
+                if (dataType === 'cardNumber') {
+                    textToCopy = textToCopy.replace(/\s/g, '');
+                }
+
+                // For expiry date, show full format
+                if (dataType === 'expiryDate') {
+                    textToCopy = cardData.expiryDate;
+                }
+
+                // Copy to clipboard
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        // Show copied state on button
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        this.classList.add('copied');
+
+                        // Show notification
+                        const notification = document.getElementById('notification');
+                        const notificationText = document.getElementById('notificationText');
+
+                        notificationText.textContent = `${getCopyLabel(dataType)} copied!`;
+                        notification.style.display = 'flex';
+
+                        // Reset button after 2 seconds
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.classList.remove('copied');
+                        }, 2000);
+
+                        // Hide notification after 3 seconds
+                        setTimeout(() => {
+                            notification.style.display = 'none';
+                        }, 3000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy. Please try again.');
+                    });
+            });
+        });
+
+        // Helper function to format card number
+        function formatCardNumber(number) {
+            // Remove any existing spaces
+            const cleaned = number.replace(/\s/g, '');
+            // Add space every 4 characters
+            return cleaned.replace(/(\d{4})/g, '$1 ').trim();
+        }
+
+        // Helper function to get copy label
+        function getCopyLabel(type) {
+            const labels = {
+                'cardNumber': 'Card number',
+                'cardholder': 'Cardholder name',
+                'expiryDate': 'Expiry date',
+                'cvv': 'CVV',
+                'billingAddress': 'Billing address',
+                'country': 'Country',
+                'zipCode': 'ZIP code',
+                'cardType': 'Card type'
+            };
+            return labels[type] || type;
+        }
+
+        // Optional: Auto-flip on hover
+        const cardFlip = document.getElementById('cardFlip');
+        let flipTimeout;
+
+        cardFlip.addEventListener('mouseenter', function () {
+            flipTimeout = setTimeout(() => {
+                this.classList.add('flipped');
+            }, 7000);
+        });
+
+        cardFlip.addEventListener('mouseleave', function () {
+            clearTimeout(flipTimeout);
+            if (this.classList.contains('flipped')) {
+                setTimeout(() => {
+                    this.classList.remove('flipped');
+                }, 7000);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Press 'F' to flip card
+            if (e.key === 'f' || e.key === 'F') {
+                document.getElementById('cardFlip').classList.toggle('flipped');
+            }
+
+            // Press '1' to copy card number, '2' for cardholder, etc.
+            if (e.key >= '1' && e.key <= '8') {
+                const buttons = document.querySelectorAll('.copy-btn');
+                const index = parseInt(e.key) - 1;
+                if (index < buttons.length) {
+                    buttons[index].click();
+                }
+            }
+
+            // Press spacebar to flip card
+            if (e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('cardFlip').classList.toggle('flipped');
+            }
+        });
+
+        // Touch support for mobile devices
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        cardFlip.addEventListener('touchstart', function (e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        cardFlip.addEventListener('touchend', function (e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swipe left - flip card
+                cardFlip.classList.add('flipped');
+            }
+
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Swipe right - flip back
+                cardFlip.classList.remove('flipped');
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
